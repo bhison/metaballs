@@ -4,18 +4,18 @@ import React, { useEffect, useRef, useState } from "react"
 
 const Metaballs = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const [metaballs, setMetaballs] = useState([
-    { x: 100, y: 150, radius: 40, initialRadius: 40 },
-    { x: 250, y: 250, radius: 60, initialRadius: 60 },
-    { x: 400, y: 100, radius: 50, initialRadius: 50 },
-    { x: 550, y: 300, radius: 70, initialRadius: 70 },
-    { x: 700, y: 200, radius: 45, initialRadius: 45 },
-    { x: 150, y: 400, radius: 55, initialRadius: 55 },
-    { x: 600, y: 450, radius: 65, initialRadius: 65 },
-  ])
+  const [metaballs, setMetaballs] = useState(() => {
+    const width = window.innerWidth
+    const height = window.innerHeight
+    return Array.from({ length: 5 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      radius: Math.random() * 50 + 30, // Random radius between 30 and 80
+      initialRadius: Math.random() * 50 + 30,
+    }))
+  })
   const [dragging, setDragging] = useState<number | null>(null)
 
-  const gridSize = 10 // Size of each grid cell
   const threshold = 1.0 // Threshold for contour
 
   useEffect(() => {
@@ -53,7 +53,7 @@ const Metaballs = () => {
       ctx.textAlign = "center"
       ctx.textBaseline = "middle"
       metaballs.forEach((ball) => {
-        ctx.fillText(ball.initialRadius.toString(), ball.x, ball.y)
+        ctx.fillText(Math.round(ball.initialRadius).toString(), ball.x, ball.y)
       })
     }
 
@@ -91,6 +91,23 @@ const Metaballs = () => {
     drawMetaballs()
   }, [metaballs])
 
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    // Add touch event listeners
+    canvas.addEventListener("touchstart", handleTouchStart, { passive: false })
+    canvas.addEventListener("touchmove", handleTouchMove, { passive: false })
+    canvas.addEventListener("touchend", handleTouchEnd)
+
+    return () => {
+      // Clean up touch event listeners
+      canvas.removeEventListener("touchstart", handleTouchStart)
+      canvas.removeEventListener("touchmove", handleTouchMove)
+      canvas.removeEventListener("touchend", handleTouchEnd)
+    }
+  }, [metaballs, dragging])
+
   const handleMouseDown = (e: React.MouseEvent) => {
     const { offsetX, offsetY } = e.nativeEvent
     const ballIndex = metaballs.findIndex((ball) =>
@@ -118,6 +135,45 @@ const Metaballs = () => {
     setDragging(null)
   }
 
+  const handleTouchStart = (e: TouchEvent) => {
+    e.preventDefault()
+    const touch = e.touches[0]
+    const { clientX, clientY } = touch
+    const rect = canvasRef.current?.getBoundingClientRect()
+    if (!rect) return
+    const offsetX = clientX - rect.left
+    const offsetY = clientY - rect.top
+    const ballIndex = metaballs.findIndex((ball) =>
+      isInsideMetaball(offsetX, offsetY, ball)
+    )
+    if (ballIndex !== -1) {
+      setDragging(ballIndex)
+    }
+  }
+
+  const handleTouchMove = (e: TouchEvent) => {
+    e.preventDefault()
+    if (dragging !== null) {
+      const touch = e.touches[0]
+      const { clientX, clientY } = touch
+      const rect = canvasRef.current?.getBoundingClientRect()
+      if (!rect) return
+      const offsetX = clientX - rect.left
+      const offsetY = clientY - rect.top
+      const newMetaballs = [...metaballs]
+      newMetaballs[dragging] = {
+        ...newMetaballs[dragging],
+        x: offsetX,
+        y: offsetY,
+      }
+      setMetaballs(newMetaballs)
+    }
+  }
+
+  const handleTouchEnd = () => {
+    setDragging(null)
+  }
+
   const isInsideMetaball = (
     x: number,
     y: number,
@@ -131,12 +187,12 @@ const Metaballs = () => {
   return (
     <canvas
       ref={canvasRef}
-      width={800}
-      height={600}
+      width={window.innerWidth}
+      height={window.innerHeight}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      style={{ border: "1px solid black" }}
+      style={{ border: "1px solid black", display: "block" }}
     />
   )
 }
