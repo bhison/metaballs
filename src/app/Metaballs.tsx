@@ -5,9 +5,13 @@ import React, { useEffect, useRef, useState } from "react"
 const Metaballs = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [metaballs, setMetaballs] = useState([
-    { x: 200, y: 200, radius: 50, initialRadius: 50 },
-    { x: 400, y: 300, radius: 70, initialRadius: 70 },
-    { x: 300, y: 100, radius: 45, initialRadius: 45 },
+    { x: 100, y: 150, radius: 40, initialRadius: 40 },
+    { x: 250, y: 250, radius: 60, initialRadius: 60 },
+    { x: 400, y: 100, radius: 50, initialRadius: 50 },
+    { x: 550, y: 300, radius: 70, initialRadius: 70 },
+    { x: 700, y: 200, radius: 45, initialRadius: 45 },
+    { x: 150, y: 400, radius: 55, initialRadius: 55 },
+    { x: 600, y: 450, radius: 65, initialRadius: 65 },
   ])
   const [dragging, setDragging] = useState<number | null>(null)
 
@@ -25,170 +29,26 @@ const Metaballs = () => {
       const width = canvas.width
       const height = canvas.height
 
-      for (let x = 0; x < width; x += gridSize) {
-        for (let y = 0; y < height; y += gridSize) {
-          const square = [
-            calculateField(x, y),
-            calculateField(x + gridSize, y),
-            calculateField(x + gridSize, y + gridSize),
-            calculateField(x, y + gridSize),
-          ]
+      const imageData = ctx.createImageData(width, height)
+      const data = imageData.data
 
-          const caseIndex = square.reduce(
-            (acc, val, idx) => acc | ((val > threshold ? 1 : 0) << idx),
-            0
-          )
-
-          // Draw lines based on the case index
-          switch (caseIndex) {
-            case 1:
-            case 14:
-              drawLine(
-                ctx,
-                interpolate(x, y + gridSize, x, y, square[3], square[0]),
-                interpolate(x, y, x + gridSize, y, square[0], square[1])
-              )
-              break
-            case 2:
-            case 13:
-              drawLine(
-                ctx,
-                interpolate(
-                  x + gridSize,
-                  y,
-                  x + gridSize,
-                  y + gridSize,
-                  square[1],
-                  square[2]
-                ),
-                interpolate(x, y, x + gridSize, y, square[0], square[1])
-              )
-              break
-            case 3:
-            case 12:
-              drawLine(
-                ctx,
-                interpolate(x, y + gridSize, x, y, square[3], square[0]),
-                interpolate(
-                  x + gridSize,
-                  y,
-                  x + gridSize,
-                  y + gridSize,
-                  square[1],
-                  square[2]
-                )
-              )
-              break
-            case 4:
-            case 11:
-              drawLine(
-                ctx,
-                interpolate(
-                  x + gridSize,
-                  y,
-                  x + gridSize,
-                  y + gridSize,
-                  square[1],
-                  square[2]
-                ),
-                interpolate(
-                  x,
-                  y + gridSize,
-                  x + gridSize,
-                  y + gridSize,
-                  square[3],
-                  square[2]
-                )
-              )
-              break
-            case 5:
-              drawLine(
-                ctx,
-                interpolate(x, y + gridSize, x, y, square[3], square[0]),
-                interpolate(x, y, x + gridSize, y, square[0], square[1])
-              )
-              drawLine(
-                ctx,
-                interpolate(
-                  x + gridSize,
-                  y,
-                  x + gridSize,
-                  y + gridSize,
-                  square[1],
-                  square[2]
-                ),
-                interpolate(
-                  x,
-                  y + gridSize,
-                  x + gridSize,
-                  y + gridSize,
-                  square[3],
-                  square[2]
-                )
-              )
-              break
-            case 6:
-            case 9:
-              drawLine(
-                ctx,
-                interpolate(x, y, x + gridSize, y, square[0], square[1]),
-                interpolate(
-                  x,
-                  y + gridSize,
-                  x + gridSize,
-                  y + gridSize,
-                  square[3],
-                  square[2]
-                )
-              )
-              break
-            case 7:
-            case 8:
-              drawLine(
-                ctx,
-                interpolate(x, y + gridSize, x, y, square[3], square[0]),
-                interpolate(
-                  x,
-                  y + gridSize,
-                  x + gridSize,
-                  y + gridSize,
-                  square[3],
-                  square[2]
-                )
-              )
-              break
-            case 10:
-              drawLine(
-                ctx,
-                interpolate(x, y, x + gridSize, y, square[0], square[1]),
-                interpolate(
-                  x + gridSize,
-                  y,
-                  x + gridSize,
-                  y + gridSize,
-                  square[1],
-                  square[2]
-                )
-              )
-              drawLine(
-                ctx,
-                interpolate(x, y + gridSize, x, y, square[3], square[0]),
-                interpolate(
-                  x,
-                  y + gridSize,
-                  x + gridSize,
-                  y + gridSize,
-                  square[3],
-                  square[2]
-                )
-              )
-              break
+      for (let x = 0; x < width; x++) {
+        for (let y = 0; y < height; y++) {
+          const fieldStrength = calculateField(x, y)
+          if (fieldStrength > threshold) {
+            const index = (x + y * width) * 4
+            data[index] = 120 // Red
+            data[index + 1] = 120 // Green
+            data[index + 2] = 180 // Blue
+            data[index + 3] = 255 // Alpha (opaque)
           }
         }
       }
 
-      // Draw the initial radius on each metaball
-      ctx.fillStyle = "black"
+      ctx.putImageData(imageData, 0, 0)
+
+      // Draw the initial radius text on each metaball in white
+      ctx.fillStyle = "white"
       ctx.font = "16px Arial"
       ctx.textAlign = "center"
       ctx.textBaseline = "middle"
