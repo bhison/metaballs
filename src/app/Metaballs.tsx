@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useRef, useState } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 
 const Metaballs = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -65,48 +65,31 @@ const Metaballs = () => {
       }, 0)
     }
 
-    const interpolate = (
-      x1: number,
-      y1: number,
-      x2: number,
-      y2: number,
-      val1: number,
-      val2: number
-    ) => {
-      const t = (threshold - val1) / (val2 - val1)
-      return { x: x1 + t * (x2 - x1), y: y1 + t * (y2 - y1) }
-    }
+    // const interpolate = (
+    //   x1: number,
+    //   y1: number,
+    //   x2: number,
+    //   y2: number,
+    //   val1: number,
+    //   val2: number
+    // ) => {
+    //   const t = (threshold - val1) / (val2 - val1)
+    //   return { x: x1 + t * (x2 - x1), y: y1 + t * (y2 - y1) }
+    // }
 
-    const drawLine = (
-      ctx: CanvasRenderingContext2D,
-      p1: { x: number; y: number },
-      p2: { x: number; y: number }
-    ) => {
-      ctx.beginPath()
-      ctx.moveTo(p1.x, p1.y)
-      ctx.lineTo(p2.x, p2.y)
-      ctx.stroke()
-    }
+    // const drawLine = (
+    //   ctx: CanvasRenderingContext2D,
+    //   p1: { x: number; y: number },
+    //   p2: { x: number; y: number }
+    // ) => {
+    //   ctx.beginPath()
+    //   ctx.moveTo(p1.x, p1.y)
+    //   ctx.lineTo(p2.x, p2.y)
+    //   ctx.stroke()
+    // }
 
     drawMetaballs()
   }, [metaballs])
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    // Add touch event listeners
-    canvas.addEventListener("touchstart", handleTouchStart, { passive: false })
-    canvas.addEventListener("touchmove", handleTouchMove, { passive: false })
-    canvas.addEventListener("touchend", handleTouchEnd)
-
-    return () => {
-      // Clean up touch event listeners
-      canvas.removeEventListener("touchstart", handleTouchStart)
-      canvas.removeEventListener("touchmove", handleTouchMove)
-      canvas.removeEventListener("touchend", handleTouchEnd)
-    }
-  }, [metaballs, dragging])
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const { offsetX, offsetY } = e.nativeEvent
@@ -135,40 +118,46 @@ const Metaballs = () => {
     setDragging(null)
   }
 
-  const handleTouchStart = (e: TouchEvent) => {
-    e.preventDefault()
-    const touch = e.touches[0]
-    const { clientX, clientY } = touch
-    const rect = canvasRef.current?.getBoundingClientRect()
-    if (!rect) return
-    const offsetX = clientX - rect.left
-    const offsetY = clientY - rect.top
-    const ballIndex = metaballs.findIndex((ball) =>
-      isInsideMetaball(offsetX, offsetY, ball)
-    )
-    if (ballIndex !== -1) {
-      setDragging(ballIndex)
-    }
-  }
-
-  const handleTouchMove = (e: TouchEvent) => {
-    e.preventDefault()
-    if (dragging !== null) {
+  const handleTouchStart = useCallback(
+    (e: TouchEvent) => {
+      e.preventDefault()
       const touch = e.touches[0]
       const { clientX, clientY } = touch
       const rect = canvasRef.current?.getBoundingClientRect()
       if (!rect) return
       const offsetX = clientX - rect.left
       const offsetY = clientY - rect.top
-      const newMetaballs = [...metaballs]
-      newMetaballs[dragging] = {
-        ...newMetaballs[dragging],
-        x: offsetX,
-        y: offsetY,
-      }
-      setMetaballs(newMetaballs)
+      const ballIndex = metaballs.findIndex((ball) =>
+        isInsideMetaball(offsetX, offsetY, ball)
+      )
+      if (ballIndex !== -1) {
+        setDragging(ballIndex)
     }
-  }
+    },
+    [metaballs]
+  )
+
+  const handleTouchMove = useCallback(
+    (e: TouchEvent) => {
+      e.preventDefault()
+      if (dragging !== null) {
+        const touch = e.touches[0]
+        const { clientX, clientY } = touch
+        const rect = canvasRef.current?.getBoundingClientRect()
+        if (!rect) return
+        const offsetX = clientX - rect.left
+        const offsetY = clientY - rect.top
+        const newMetaballs = [...metaballs]
+        newMetaballs[dragging] = {
+          ...newMetaballs[dragging],
+          x: offsetX,
+          y: offsetY,
+        }
+        setMetaballs(newMetaballs)
+      }
+    },
+    [dragging, metaballs]
+  )
 
   const handleTouchEnd = () => {
     setDragging(null)
@@ -183,6 +172,23 @@ const Metaballs = () => {
     const dy = y - ball.y
     return Math.sqrt(dx * dx + dy * dy) < ball.radius
   }
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    // Add touch event listeners
+    canvas.addEventListener("touchstart", handleTouchStart, { passive: false })
+    canvas.addEventListener("touchmove", handleTouchMove, { passive: false })
+    canvas.addEventListener("touchend", handleTouchEnd)
+
+    return () => {
+      // Clean up touch event listeners
+      canvas.removeEventListener("touchstart", handleTouchStart)
+      canvas.removeEventListener("touchmove", handleTouchMove)
+      canvas.removeEventListener("touchend", handleTouchEnd)
+    }
+  }, [metaballs, dragging, handleTouchStart, handleTouchMove])
 
   return (
     <canvas

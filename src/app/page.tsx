@@ -1,11 +1,19 @@
-import React from "react"
+"use client"
+
+import React, { useEffect, useState } from "react"
 import Metaballs from "./Metaballs"
 
 const Page = () => {
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
   return (
     <div style={{ position: "relative", width: "100%", height: "100vh" }}>
       <h1 style={titleStyle}>METABALLS</h1>
-      <Metaballs />
+      {isClient && <Metaballs />}
     </div>
   )
 }
