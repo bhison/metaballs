@@ -19,7 +19,7 @@ export const Target = ({ className }: { className?: string }) => {
       <motion.div
         className={cn(
           "min-w-[12rem] p-[1%] rounded-[2rem] contain-content flex shadow-lg border-4 border-yellow-300 tansition-color transition-scale cursor-pointer duration-150",
-          submitHovered ? "bg-green-600 p-[3%]" : "bg-red-400",
+          submitHovered ? "bg-green-600 p-[3%]" : "bg-red-500 opacity-90",
           className,
         )}
         onClick={() => {
