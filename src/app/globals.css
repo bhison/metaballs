@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+p, h1, h2, h3, span {
+  @apply user-select-none;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('./fonts/GeistMonoVF.woff') format('woff');
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

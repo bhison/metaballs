@@ -1,20 +1,21 @@
 "use client"
 
-import { motion, useAnimate } from "motion/react"
-import { useEffect, useState } from "react"
-import Metaballs from "./Metaballs"
-import { symbols } from "./consts"
-import { calculatedCursorTextOffset } from "./lib/util"
+import { motion, useAnimate } from "motion/react";
+import { useEffect, useState } from "react";
+import Metaballs from "./Metaballs";
+import { Target } from "./components/target";
+import { symbols } from "./consts";
+import { calculatedCursorTextOffset } from "./lib/util";
 
 const Page = () => {
-  const [isClient, setIsClient] = useState(false)
-  const [cursorText, setCursorText] = useState("")
-  const [scope, animate] = useAnimate()
-  const [pointerPosition, setPointerPosition] = useState({ x: 0, y: 0 })
+  const [isClient, setIsClient] = useState(false);
+  const [cursorText, setCursorText] = useState("");
+  const [scope, animate] = useAnimate();
+  const [pointerPosition, setPointerPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
-    setIsClient(true)
-  }, [])
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     animate(
@@ -25,17 +26,17 @@ const Page = () => {
         ease: "easeOut",
       },
     );
-  }, [cursorText, animate, scope])
+  }, [cursorText, animate, scope]);
 
   useEffect(() => {
     const handlePointerMove = (event: PointerEvent) => {
-      setPointerPosition({ x: event.clientX, y: event.clientY })
-    }
-    window.addEventListener("pointermove", handlePointerMove)
+      setPointerPosition({ x: event.clientX, y: event.clientY });
+    };
+    window.addEventListener("pointermove", handlePointerMove);
     return () => {
-      window.removeEventListener("pointermove", handlePointerMove)
-    }
-  }, [])
+      window.removeEventListener("pointermove", handlePointerMove);
+    };
+  }, []);
 
   return (
     <div className="w-full h-full relative">
@@ -61,9 +62,12 @@ const Page = () => {
           backgroundPosition: "center",
         }}
       />
+      <div className="absolute top-0 flex flex-col w-full h-full gap-4 items-center p-4 z-20 pointer-events-none">
+        <Target className="pointer-events-auto" />
+      </div>
     </div>
-  )
-}
+  );
+};
 
 const titleStyle: React.CSSProperties = {
   position: "absolute",

@@ -48,8 +48,8 @@ export const generateBalls = (
 
   let attempts = 0
 
-  const maxBubbleSize = 50
-  const minBubbleSize = 30
+  const maxBubbleSize = 75;
+  const minBubbleSize = 30;
 
   const adjustedMaxBubbleSize = Math.max(
     minBubbleSize,
