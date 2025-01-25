@@ -32,14 +32,27 @@ const Metaballs = () => {
       const imageData = ctx.createImageData(width, height)
       const data = imageData.data
 
+      const intersectingBalls = findIntersectingBalls()
+
       for (let x = 0; x < width; x++) {
         for (let y = 0; y < height; y++) {
           const fieldStrength = calculateField(x, y)
           if (fieldStrength > threshold) {
             const index = (x + y * width) * 4
-            data[index] = 120 // Red
-            data[index + 1] = 120 // Green
-            data[index + 2] = 180 // Blue
+            const isIntersecting = isPixelInfluencedByIntersectingBall(
+              x,
+              y,
+              intersectingBalls
+            )
+            if (isIntersecting) {
+              data[index] = 255 // Red
+              data[index + 1] = 0 // Green
+              data[index + 2] = 255 // Blue
+            } else {
+              data[index] = 120 // Red
+              data[index + 1] = 120 // Green
+              data[index + 2] = 180 // Blue
+            }
             data[index + 3] = 255 // Alpha (opaque)
           }
         }
@@ -65,28 +78,38 @@ const Metaballs = () => {
       }, 0)
     }
 
-    // const interpolate = (
-    //   x1: number,
-    //   y1: number,
-    //   x2: number,
-    //   y2: number,
-    //   val1: number,
-    //   val2: number
-    // ) => {
-    //   const t = (threshold - val1) / (val2 - val1)
-    //   return { x: x1 + t * (x2 - x1), y: y1 + t * (y2 - y1) }
-    // }
+    const findIntersectingBalls = () => {
+      const intersecting = new Set<number>()
+      for (let i = 0; i < metaballs.length; i++) {
+        for (let j = i + 1; j < metaballs.length; j++) {
+          const ball1 = metaballs[i]
+          const ball2 = metaballs[j]
+          const dx = ball1.x - ball2.x
+          const dy = ball1.y - ball2.y
+          const distance = Math.sqrt(dx * dx + dy * dy)
+          if (distance < ball1.radius + ball2.radius) {
+            intersecting.add(i)
+            intersecting.add(j)
+          }
+        }
+      }
+      return intersecting
+    }
 
-    // const drawLine = (
-    //   ctx: CanvasRenderingContext2D,
-    //   p1: { x: number; y: number },
-    //   p2: { x: number; y: number }
-    // ) => {
-    //   ctx.beginPath()
-    //   ctx.moveTo(p1.x, p1.y)
-    //   ctx.lineTo(p2.x, p2.y)
-    //   ctx.stroke()
-    // }
+    const isPixelInfluencedByIntersectingBall = (
+      x: number,
+      y: number,
+      intersectingBalls: Set<number>
+    ) => {
+      let totalInfluence = 0
+      intersectingBalls.forEach((i) => {
+        const ball = metaballs[i]
+        const dx = x - ball.x
+        const dy = y - ball.y
+        totalInfluence += (ball.radius * ball.radius) / (dx * dx + dy * dy)
+      })
+      return totalInfluence > threshold
+    }
 
     drawMetaballs()
   }, [metaballs])
