@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useCallback, useEffect, useRef, useState } from "react"
+import { hexToRgb } from "./lib/util"
 
 const Metaballs = ({
   setDebugText,
@@ -21,6 +22,14 @@ const Metaballs = ({
   const [dragging, setDragging] = useState<number | null>(null)
 
   const threshold = 1.0 // Threshold for contour
+
+  // Define color variables using hex codes
+  const intersectingColorHex = "#11B4FF"
+  const nonIntersectingColorHex = "#11D4FF"
+
+  // Convert the hex colors to RGB once
+  const intersectingColorRGB = hexToRgb(intersectingColorHex)
+  const nonIntersectingColorRGB = hexToRgb(nonIntersectingColorHex)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -51,13 +60,15 @@ const Metaballs = ({
             )
             if (isIntersecting) {
               anyIntersecting = true
-              data[index] = 255 // Red
-              data[index + 1] = 0 // Green
-              data[index + 2] = 255 // Blue
+              // Use intersectingColorRGB array
+              data[index] = intersectingColorRGB[0] // Red
+              data[index + 1] = intersectingColorRGB[1] // Green
+              data[index + 2] = intersectingColorRGB[2] // Blue
             } else {
-              data[index] = 120 // Red
-              data[index + 1] = 120 // Green
-              data[index + 2] = 180 // Blue
+              // Use nonIntersectingColorRGB array
+              data[index] = nonIntersectingColorRGB[0] // Red
+              data[index + 1] = nonIntersectingColorRGB[1] // Green
+              data[index + 2] = nonIntersectingColorRGB[2] // Blue
             }
             data[index + 3] = 255 // Alpha (opaque)
           }
@@ -69,8 +80,8 @@ const Metaballs = ({
       ctx.putImageData(imageData, 0, 0)
 
       // Draw the initial radius text on each metaball in white
-      ctx.fillStyle = "white"
-      ctx.font = "16px Arial"
+      ctx.fillStyle = "#F7F"
+      ctx.font = "bold 32px Arial"
       ctx.textAlign = "center"
       ctx.textBaseline = "middle"
       metaballs.forEach((ball) => {
@@ -120,7 +131,7 @@ const Metaballs = ({
     }
 
     drawMetaballs()
-  }, [metaballs])
+  }, [metaballs, setDebugText, intersectingColorRGB, nonIntersectingColorRGB])
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const { offsetX, offsetY } = e.nativeEvent
