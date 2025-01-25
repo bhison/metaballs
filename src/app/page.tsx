@@ -44,7 +44,7 @@ const Page = () => {
   }, [])
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "100vh" }}>
+    <div className="w-full h-full relative">
       <motion.p
         className="user-select-none"
         style={{
@@ -56,11 +56,15 @@ const Page = () => {
       >
         {cursorText}
       </motion.p>
-      {isClient && (
-        <div>
-          <Metaballs setDebugText={setCursorText} />
-        </div>
-      )}
+      {isClient && <Metaballs setDebugText={setCursorText} />}
+      <div
+        className="absolute inset-0 bg-black opacity-70 pointer-events-none z-[-10]" // Add this overlay
+        style={{
+          backgroundImage: "url('/img/cloud-bg.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
     </div>
   )
 }

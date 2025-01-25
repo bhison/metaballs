@@ -5,8 +5,10 @@ import { calculateRelativeDirection, hexToRgb } from "./lib/util"
 
 const Metaballs = ({
   setDebugText,
+  className,
 }: {
   setDebugText: (text: string) => void
+  className?: string
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [metaballs, setMetaballs] = useState(() => {
@@ -36,6 +38,8 @@ const Metaballs = ({
     if (!canvas) return
     const ctx = canvas.getContext("2d")
     if (!ctx) return
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height) // Clear with transparency
 
     const drawMetaballs = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -258,6 +262,7 @@ const Metaballs = ({
 
   return (
     <canvas
+      className={className}
       ref={canvasRef}
       width={window.innerWidth}
       height={window.innerHeight}

@@ -1,3 +1,9 @@
+import clsx, { ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
 export const hexToRgb = (hex: string): [number, number, number] => {
   // Remove the hash symbol if present
   hex = hex.replace(/^#/, "")
@@ -18,8 +24,6 @@ export const calculateRelativeDirection = (
   if (Math.abs(dx) > Math.abs(dy)) {
     return dx > 0 ? "West" : "East"
   } else {
-    return dy > 0
-      ? "North"
-      : `South (b1: ${ball1.x}, ${ball1.y}) (b2: ${ball2.x}, ${ball2.y})`
+    return dy > 0 ? "North" : `South`
   }
 }
