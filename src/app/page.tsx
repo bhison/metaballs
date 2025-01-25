@@ -19,12 +19,12 @@ const Page = () => {
   useEffect(() => {
     animate(
       scope.current,
-      { y: [-30, 15, 0] },
+      { y: [-20, 15, 0] },
       {
         duration: 0.2,
         ease: "easeOut",
-      }
-    )
+      },
+    );
   }, [cursorText, animate, scope])
 
   useEffect(() => {

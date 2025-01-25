@@ -20,145 +20,150 @@ const Metaballs = ({
   // Define color variables using hex codes
   const intersectingColorHex = "#11B4FF"
   const nonIntersectingColorHex = "#11D4FF"
-  const textColorHex = "#F7F"
+  const textColorHex = "#E9E";
 
   // Convert the hex colors to RGB once
-  const intersectingColorRGB = hexToRgb(intersectingColorHex)
-  const nonIntersectingColorRGB = hexToRgb(nonIntersectingColorHex)
+  const intersectingColorRGB = hexToRgb(intersectingColorHex);
+  const nonIntersectingColorRGB = hexToRgb(nonIntersectingColorHex);
 
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height) // Clear with transparency
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear with transparency
 
     const drawMetaballs = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      const width = canvas.width
-      const height = canvas.height
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const width = canvas.width;
+      const height = canvas.height;
 
-      const imageData = ctx.createImageData(width, height)
-      const data = imageData.data
+      const imageData = ctx.createImageData(width, height);
+      const data = imageData.data;
 
-      const intersectingBalls = findIntersectingBalls()
+      const intersectingBalls = findIntersectingBalls();
 
-      let anyIntersecting = false
-      let debugText = ""
+      let anyIntersecting = false;
+      let debugText = "";
 
       if (dragging !== null) {
-        const draggedBall = metaballs[dragging]
+        const draggedBall = metaballs[dragging];
         intersectingBalls.forEach((i) => {
           if (i !== dragging) {
             const position = calculateRelativeDirection(
               draggedBall,
-              metaballs[i]
-            )
+              metaballs[i],
+            );
             if (position) {
-              debugText = position // Set the debug text based on the position
-              anyIntersecting = true
+              debugText = position; // Set the debug text based on the position
+              anyIntersecting = true;
             }
           }
-        })
+        });
       }
 
       for (let x = 0; x < width; x++) {
         for (let y = 0; y < height; y++) {
-          const fieldStrength = calculateField(x, y)
+          const fieldStrength = calculateField(x, y);
           if (fieldStrength > threshold) {
-            const index = (x + y * width) * 4
+            const index = (x + y * width) * 4;
             const isIntersecting = isPixelInfluencedByIntersectingBall(
               x,
               y,
-              intersectingBalls
-            )
+              intersectingBalls,
+            );
             if (isIntersecting) {
-              anyIntersecting = true
+              anyIntersecting = true;
               // Use intersectingColorRGB array
-              data[index] = intersectingColorRGB[0] // Red
-              data[index + 1] = intersectingColorRGB[1] // Green
-              data[index + 2] = intersectingColorRGB[2] // Blue
+              data[index] = intersectingColorRGB[0]; // Red
+              data[index + 1] = intersectingColorRGB[1]; // Green
+              data[index + 2] = intersectingColorRGB[2]; // Blue
             } else {
               // Use nonIntersectingColorRGB array
-              data[index] = nonIntersectingColorRGB[0] // Red
-              data[index + 1] = nonIntersectingColorRGB[1] // Green
-              data[index + 2] = nonIntersectingColorRGB[2] // Blue
+              data[index] = nonIntersectingColorRGB[0]; // Red
+              data[index + 1] = nonIntersectingColorRGB[1]; // Green
+              data[index + 2] = nonIntersectingColorRGB[2]; // Blue
             }
-            data[index + 3] = 255 // Alpha (opaque)
+            data[index + 3] = 255; // Alpha (opaque)
           }
         }
       }
 
-      setDebugText(anyIntersecting ? debugText : "")
+      setDebugText(anyIntersecting ? debugText : "");
 
-      ctx.putImageData(imageData, 0, 0)
+      ctx.putImageData(imageData, 0, 0);
 
       // Draw the initial radius text on each metaball in white
-      ctx.fillStyle = textColorHex
-      ctx.font = "bold 32px Arial"
-      ctx.textAlign = "center"
-      ctx.textBaseline = "middle"
+      ctx.font = "bold 32px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
       metaballs.forEach(
-        (metaball: { x: number; y: number; initialRadius: number }) => {
+        (
+          metaball: { x: number; y: number; initialRadius: number },
+          index: number,
+        ) => {
+          // Check if the current metaball is intersecting
+          const isIntersecting = intersectingBalls.has(index);
+          ctx.fillStyle = isIntersecting ? "#FFFFFF" : textColorHex; // Change text color to white if intersecting
           ctx.fillText(
             Math.round(metaball.initialRadius).toString(),
             metaball.x,
-            metaball.y
-          )
-        }
-      )
-    }
+            metaball.y,
+          );
+        },
+      );
+    };
 
     const calculateField = (x: number, y: number) => {
       return metaballs.reduce((sum, ball) => {
-        const dx = x - ball.x
-        const dy = y - ball.y
-        return sum + (ball.radius * ball.radius) / (dx * dx + dy * dy)
-      }, 0)
-    }
+        const dx = x - ball.x;
+        const dy = y - ball.y;
+        return sum + (ball.radius * ball.radius) / (dx * dx + dy * dy);
+      }, 0);
+    };
 
     const findIntersectingBalls = () => {
-      const intersecting = new Set<number>()
+      const intersecting = new Set<number>();
       for (let i = 0; i < metaballs.length; i++) {
         for (let j = i + 1; j < metaballs.length; j++) {
-          const ball1 = metaballs[i]
-          const ball2 = metaballs[j]
-          const dx = ball1.x - ball2.x
-          const dy = ball1.y - ball2.y
-          const distance = Math.sqrt(dx * dx + dy * dy)
+          const ball1 = metaballs[i];
+          const ball2 = metaballs[j];
+          const dx = ball1.x - ball2.x;
+          const dy = ball1.y - ball2.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
           if (distance < ball1.radius + ball2.radius) {
-            intersecting.add(i)
-            intersecting.add(j)
+            intersecting.add(i);
+            intersecting.add(j);
           }
         }
       }
-      return intersecting
-    }
+      return intersecting;
+    };
 
     const isPixelInfluencedByIntersectingBall = (
       x: number,
       y: number,
-      intersectingBalls: Set<number>
+      intersectingBalls: Set<number>,
     ) => {
-      let totalInfluence = 0
+      let totalInfluence = 0;
       intersectingBalls.forEach((i) => {
-        const ball = metaballs[i]
-        const dx = x - ball.x
-        const dy = y - ball.y
-        totalInfluence += (ball.radius * ball.radius) / (dx * dx + dy * dy)
-      })
-      return totalInfluence > threshold
-    }
+        const ball = metaballs[i];
+        const dx = x - ball.x;
+        const dy = y - ball.y;
+        totalInfluence += (ball.radius * ball.radius) / (dx * dx + dy * dy);
+      });
+      return totalInfluence > threshold;
+    };
 
-    drawMetaballs()
+    drawMetaballs();
   }, [
     metaballs,
     setDebugText,
     intersectingColorRGB,
     nonIntersectingColorRGB,
     dragging,
-  ])
+  ]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const { offsetX, offsetY } = e.nativeEvent
