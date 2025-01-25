@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import { hexToRgb } from "./lib/util"
+import { calculateRelativeDirection, hexToRgb } from "./lib/util"
 
 const Metaballs = ({
   setDebugText,
@@ -48,6 +48,24 @@ const Metaballs = ({
       const intersectingBalls = findIntersectingBalls()
 
       let anyIntersecting = false
+      let debugText = ""
+
+      if (dragging !== null) {
+        const draggedBall = metaballs[dragging]
+        intersectingBalls.forEach((i) => {
+          if (i !== dragging) {
+            const position = calculateRelativeDirection(
+              draggedBall,
+              metaballs[i]
+            )
+            if (position) {
+              debugText = position // Set the debug text based on the position
+              anyIntersecting = true
+            }
+          }
+        })
+      }
+
       for (let x = 0; x < width; x++) {
         for (let y = 0; y < height; y++) {
           const fieldStrength = calculateField(x, y)
@@ -75,7 +93,7 @@ const Metaballs = ({
         }
       }
 
-      setDebugText(anyIntersecting ? "INTERSECTING" : "")
+      setDebugText(anyIntersecting ? debugText : "")
 
       ctx.putImageData(imageData, 0, 0)
 
@@ -131,7 +149,13 @@ const Metaballs = ({
     }
 
     drawMetaballs()
-  }, [metaballs, setDebugText, intersectingColorRGB, nonIntersectingColorRGB])
+  }, [
+    metaballs,
+    setDebugText,
+    intersectingColorRGB,
+    nonIntersectingColorRGB,
+    dragging,
+  ])
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const { offsetX, offsetY } = e.nativeEvent
