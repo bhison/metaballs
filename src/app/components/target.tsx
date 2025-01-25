@@ -8,7 +8,7 @@ export const Target = ({ className }: { className?: string }) => {
   return (
     <div className={cn("relative mt-6", className)}>
       <span
-        className="font-extrabold absolute z-20 text-2xl text-center w-full mt-[-1.75rem]"
+        className="font-extrabold absolute z-20 text-2xl text-center w-full mt-[-1.85rem]"
         style={{
           color: "#EEB366",
           textShadow: "2px 2px 1px #FE5937",
