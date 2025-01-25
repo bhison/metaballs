@@ -1,7 +1,8 @@
 "use client"
 
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import { calculateRelativeDirection, hexToRgb } from "./lib/util"
+import { calculateRelativeDirection, generateBalls, hexToRgb } from "./lib/util"
+import { Metaball } from "./types"
 
 const Metaballs = ({
   setDebugText,
@@ -11,42 +12,7 @@ const Metaballs = ({
   className?: string
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const [metaballs, setMetaballs] = useState(() => {
-    const width = window.innerWidth
-    const height = window.innerHeight
-    const balls: {
-      x: number
-      y: number
-      radius: number
-      initialRadius: number
-    }[] = []
-    const minDistance = 100 // Minimum distance between balls
-
-    while (balls.length < 6) {
-      const radius = Math.random() * 50 + 30
-      const x = Math.random() * (width - radius * 2) + radius // Ensure ball is fully within width
-      const y =
-        Math.random() * (height * 0.75 - radius * 2) + (height * 0.25 + radius) // Ensure ball is not in top 25%
-
-      // Check if the new ball overlaps with existing balls
-      const isOverlapping = balls.some((ball) => {
-        const dx = x - ball.x
-        const dy = y - ball.y
-        const distance = Math.sqrt(dx * dx + dy * dy)
-        return distance < radius + ball.radius + minDistance
-      })
-
-      if (!isOverlapping) {
-        balls.push({
-          x,
-          y,
-          radius,
-          initialRadius: radius,
-        })
-      }
-    }
-    return balls
-  })
+  const [metaballs, setMetaballs] = useState<Metaball[]>(generateBalls(6))
   const [dragging, setDragging] = useState<number | null>(null)
 
   const threshold = 1.0 // Threshold for contour
@@ -132,9 +98,15 @@ const Metaballs = ({
       ctx.font = "bold 32px Arial"
       ctx.textAlign = "center"
       ctx.textBaseline = "middle"
-      metaballs.forEach((ball) => {
-        ctx.fillText(Math.round(ball.initialRadius).toString(), ball.x, ball.y)
-      })
+      metaballs.forEach(
+        (metaball: { x: number; y: number; initialRadius: number }) => {
+          ctx.fillText(
+            Math.round(metaball.initialRadius).toString(),
+            metaball.x,
+            metaball.y
+          )
+        }
+      )
     }
 
     const calculateField = (x: number, y: number) => {
@@ -301,3 +273,4 @@ const Metaballs = ({
 }
 
 export default Metaballs
+

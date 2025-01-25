@@ -13,7 +13,7 @@ export const useGame = () => {
     setTarget(target)
   }
 
-  const checkMove = ({ ball: { x, y }, operation }: Move) =>
+  const checkMove = ({ numbers: { x, y }, operation }: Move) =>
     !!calculateResult(x, y, operation)
 
   const executeMove = ({ numbers: { x, y }, operation }: Move) => {

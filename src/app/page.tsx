@@ -1,12 +1,12 @@
 "use client"
 
-import { motion, useAnimate } from "framer-motion"
+import { motion, useAnimate } from "motion/react"
 import { useEffect, useState } from "react"
 import Metaballs from "./Metaballs"
 
 const CURSOR_TEXT_OFFSET = {
-  x: 25,
-  y: -30,
+  x: 0,
+  y: -100,
 }
 
 const Page = () => {
@@ -14,6 +14,13 @@ const Page = () => {
   const [cursorText, setCursorText] = useState("")
   const [scope, animate] = useAnimate()
   const [pointerPosition, setPointerPosition] = useState({ x: 0, y: 0 })
+
+  const getCursorTextWidth = () => {
+    if (scope.current) {
+      return scope.current.getBoundingClientRect().width
+    }
+    return 0
+  }
 
   useEffect(() => {
     setIsClient(true)
@@ -25,7 +32,6 @@ const Page = () => {
       { y: [-30, 15, 0] },
       {
         duration: 0.2,
-        // repeat:
         ease: "easeOut",
       }
     )
@@ -46,10 +52,13 @@ const Page = () => {
   return (
     <div className="w-full h-full relative">
       <motion.p
-        className="user-select-none"
+        className="user-select-none relative"
         style={{
           ...titleStyle,
-          left: pointerPosition.x + CURSOR_TEXT_OFFSET.x,
+          left:
+            pointerPosition.x +
+            CURSOR_TEXT_OFFSET.x +
+            -getCursorTextWidth() / 2,
           top: pointerPosition.y + CURSOR_TEXT_OFFSET.y,
         }}
         ref={scope}
