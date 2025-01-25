@@ -21,7 +21,7 @@ interface GameContextType {
   gameActive: boolean;
   playerScore: number;
   timeLeft: number;
-  percentGameTime: number;
+  timeLeftPercentage: number;
   breakBall: (ball: Ball) => void;
   submitHovered: boolean;
   setSubmitHovered: (hovered: boolean) => void;
@@ -38,8 +38,8 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
   const [plusPoints, setPlusPoints] = useState(STARTING_PLUS_POINTS);
   const [playerScore, setPlayerScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
-  const percentGameTime = useMemo(() => {
-    return Math.round((timeLeft / GAME_TIME) * 100);
+  const timeLeftPercentage = useMemo(() => {
+    return Math.round(timeLeft / GAME_TIME);
   }, [timeLeft]);
 
   const [submitHovered, setSubmitHovered] = useState(false);
@@ -115,7 +115,7 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
       if (timeLeft === 0) {
         setGameActive(false);
       }
-    }, 100);
+    }, 5000);
     return () => clearInterval(int);
   }, [gameActive, timeLeft]);
 
@@ -134,7 +134,7 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
         gameActive,
         playerScore,
         timeLeft,
-        percentGameTime,
+        timeLeftPercentage,
         breakBall,
         submitHovered,
         setSubmitHovered,

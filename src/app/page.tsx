@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Metaballs from "./Metaballs";
 import { Target } from "./components/target";
 import { symbols } from "./consts";
+import { useGame } from "./gameContext";
 import { calculatedCursorTextOffset } from "./lib/util";
 
 const Page = () => {
@@ -12,10 +13,18 @@ const Page = () => {
   const [cursorText, setCursorText] = useState("");
   const [scope, animate] = useAnimate();
   const [pointerPosition, setPointerPosition] = useState({ x: 0, y: 0 });
+  const { newGame, gameActive } = useGame();
 
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  useEffect(() => {
+    console.log("called");
+    if (!gameActive) {
+      newGame();
+    }
+  }, [newGame, gameActive]);
 
   useEffect(() => {
     animate(
