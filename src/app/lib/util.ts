@@ -18,14 +18,14 @@ export const hexToRgb = (hex: string): [number, number, number] => {
 export const calculateRelativeDirection = (
   ball1: { x: number; y: number },
   ball2: { x: number; y: number }
-) => {
+): "plus" | "minus" | "times" | "divide" => {
   const dx = ball2.x - ball1.x
   const dy = ball2.y - ball1.y
 
   if (Math.abs(dx) > Math.abs(dy)) {
-    return dx > 0 ? "West" : "East"
+    return dx > 0 ? "plus" : "minus"
   } else {
-    return dy > 0 ? "North" : `South`
+    return dy > 0 ? "divide" : "times"
   }
 }
 
