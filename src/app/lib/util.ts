@@ -96,3 +96,42 @@ export const generateBalls = (
   return balls
 }
 
+const CURSOR_TEXT_OFFSET = 40
+export const calculatedCursorTextOffset = (
+  cursorText: string,
+  scope: React.RefObject<HTMLDivElement>
+) => {
+  if (!cursorText || !cursorText.length || !scope.current) return { x: 0, y: 0 }
+  const cursorTextCenterOffsetX = -(
+    scope.current.getBoundingClientRect().width / 2
+  )
+  const cursorTextCenterOffsetY = -(
+    scope.current.getBoundingClientRect().height / 2
+  )
+
+  if (cursorText === "plus") {
+    return {
+      x: cursorTextCenterOffsetX + CURSOR_TEXT_OFFSET,
+      y: cursorTextCenterOffsetY,
+    }
+  }
+  if (cursorText === "minus") {
+    return {
+      x: cursorTextCenterOffsetX - CURSOR_TEXT_OFFSET,
+      y: cursorTextCenterOffsetY,
+    }
+  }
+  if (cursorText === "times") {
+    return {
+      x: cursorTextCenterOffsetX,
+      y: cursorTextCenterOffsetY - CURSOR_TEXT_OFFSET,
+    }
+  }
+  if (cursorText === "divide") {
+    return {
+      x: cursorTextCenterOffsetX,
+      y: cursorTextCenterOffsetY + CURSOR_TEXT_OFFSET,
+    }
+  }
+  return { x: cursorTextCenterOffsetX, y: cursorTextCenterOffsetY }
+}

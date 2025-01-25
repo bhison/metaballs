@@ -20,6 +20,7 @@ const Metaballs = ({
   // Define color variables using hex codes
   const intersectingColorHex = "#11B4FF"
   const nonIntersectingColorHex = "#11D4FF"
+  const textColorHex = "#F7F"
 
   // Convert the hex colors to RGB once
   const intersectingColorRGB = hexToRgb(intersectingColorHex)
@@ -94,7 +95,7 @@ const Metaballs = ({
       ctx.putImageData(imageData, 0, 0)
 
       // Draw the initial radius text on each metaball in white
-      ctx.fillStyle = "#F7F"
+      ctx.fillStyle = textColorHex
       ctx.font = "bold 32px Arial"
       ctx.textAlign = "center"
       ctx.textBaseline = "middle"

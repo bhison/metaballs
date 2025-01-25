@@ -11,16 +11,16 @@ export type Ball = {
   index: number
   value: number
   layers: number
-  parents: {
+  parents?: {
     x: Ball
     y: Ball
   }
 }
 
 export type Move = {
-  numbers: {
-    x: number
-    y: number
+  balls: {
+    x: Ball
+    y: Ball
   }
   operation: Operation
 }
