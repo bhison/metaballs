@@ -2,7 +2,11 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react"
 
-const Metaballs = () => {
+const Metaballs = ({
+  setDebugText,
+}: {
+  setDebugText: (text: string) => void
+}) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [metaballs, setMetaballs] = useState(() => {
     const width = window.innerWidth
@@ -34,6 +38,7 @@ const Metaballs = () => {
 
       const intersectingBalls = findIntersectingBalls()
 
+      let anyIntersecting = false
       for (let x = 0; x < width; x++) {
         for (let y = 0; y < height; y++) {
           const fieldStrength = calculateField(x, y)
@@ -45,6 +50,7 @@ const Metaballs = () => {
               intersectingBalls
             )
             if (isIntersecting) {
+              anyIntersecting = true
               data[index] = 255 // Red
               data[index + 1] = 0 // Green
               data[index + 2] = 255 // Blue
@@ -57,6 +63,8 @@ const Metaballs = () => {
           }
         }
       }
+
+      setDebugText(anyIntersecting ? "INTERSECTING" : "")
 
       ctx.putImageData(imageData, 0, 0)
 
@@ -155,7 +163,7 @@ const Metaballs = () => {
       )
       if (ballIndex !== -1) {
         setDragging(ballIndex)
-    }
+      }
     },
     [metaballs]
   )
