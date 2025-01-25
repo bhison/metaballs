@@ -11,16 +11,16 @@ const Metaballs = ({
   setDebugText: (text: string) => void
   className?: string
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const [metaballs, setMetaballs] = useState<Metaball[]>(generateBalls(6))
-  const [dragging, setDragging] = useState<number | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [metaballs, setMetaballs] = useState<Metaball[]>(generateBalls(6));
+  const [dragging, setDragging] = useState<number | null>(null);
 
-  const threshold = 1.0 // Threshold for contour
+  const threshold = 1.0; // Threshold for contour
 
   // Define color variables using hex codes
-  const intersectingColorHex = "#11B4FF"
-  const nonIntersectingColorHex = "#11D4FF"
-  const textColorHex = "#FE8847";
+  const intersectingColorHex = "#11B4FF";
+  const nonIntersectingColorHex = "#11D4FF";
+  const textColorHex = "#DEF";
 
   // Convert the hex colors to RGB once
   const intersectingColorRGB = hexToRgb(intersectingColorHex);
@@ -63,16 +63,19 @@ const Metaballs = ({
         });
       }
 
+      // Draw metaballs
       for (let x = 0; x < width; x++) {
         for (let y = 0; y < height; y++) {
           const fieldStrength = calculateField(x, y);
+          const index = (x + y * width) * 4;
+
           if (fieldStrength > threshold) {
-            const index = (x + y * width) * 4;
             const isIntersecting = isPixelInfluencedByIntersectingBall(
               x,
               y,
               intersectingBalls,
             );
+
             if (isIntersecting) {
               anyIntersecting = true;
               // Use intersectingColorRGB array
@@ -90,9 +93,37 @@ const Metaballs = ({
         }
       }
 
-      setDebugText(anyIntersecting ? debugText : "");
+      ctx.putImageData(imageData, 0, 0); // Draw the filled metaballs first
 
-      ctx.putImageData(imageData, 0, 0);
+      ctx.strokeStyle = "rgba(119, 255, 255, 0.5)";
+
+      ctx.lineWidth = 2.5; // Set outline width to 2 pixels
+
+      // Draw the outline based on the filled metaballs
+      for (let x = 0; x < width; x++) {
+        for (let y = 0; y < height; y++) {
+          const fieldStrength = calculateField(x, y);
+
+          // Check if the current pixel is on the edge of a metaball
+          if (fieldStrength > threshold) {
+            // Check surrounding pixels to determine if this pixel is an edge
+            const isEdge = [
+              calculateField(x - 1, y),
+              calculateField(x + 1, y),
+              calculateField(x, y - 1),
+              calculateField(x, y + 1),
+            ].some((strength) => strength <= threshold);
+
+            if (isEdge) {
+              ctx.beginPath();
+              ctx.arc(x, y, 1, 0, Math.PI * 2); // Draw a small circle for the outline
+              ctx.stroke(); // Draw the outline
+            }
+          }
+        }
+      }
+
+      setDebugText(anyIntersecting ? debugText : "");
 
       // Draw the initial radius text on each metaball in white
       ctx.font = "bold 32px 'Arial'";
@@ -166,103 +197,117 @@ const Metaballs = ({
   ]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    const { offsetX, offsetY } = e.nativeEvent
+    const { offsetX, offsetY } = e.nativeEvent;
     const ballIndex = metaballs.findIndex((ball) =>
-      isInsideMetaball(offsetX, offsetY, ball)
-    )
+      isInsideMetaball(offsetX, offsetY, ball),
+    );
     if (ballIndex !== -1) {
-      setDragging(ballIndex)
+      setDragging(ballIndex);
     }
-  }
+  };
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    const { offsetX, offsetY } = e.nativeEvent;
+    const ballIndex = metaballs.findIndex((ball) =>
+      isInsideMetaball(offsetX, offsetY, ball),
+    );
+
+    // Change cursor style based on whether the mouse is over a metaball
+    if (ballIndex !== -1) {
+      canvasRef.current!.style.cursor =
+        dragging !== null ? "grabbing" : "pointer";
+    } else {
+      canvasRef.current!.style.cursor = "default";
+    }
+
     if (dragging !== null) {
-      const { offsetX, offsetY } = e.nativeEvent
-      const newMetaballs = [...metaballs]
+      const newMetaballs = [...metaballs];
       newMetaballs[dragging] = {
         ...newMetaballs[dragging],
         x: offsetX,
         y: offsetY,
-      }
-      setMetaballs(newMetaballs)
+      };
+      setMetaballs(newMetaballs);
     }
-  }
+  };
 
   const handleMouseUp = () => {
-    setDragging(null)
-  }
+    setDragging(null);
+    // Reset cursor style when mouse is released
+    canvasRef.current!.style.cursor = "default";
+  };
 
   const handleTouchStart = useCallback(
     (e: TouchEvent) => {
-      e.preventDefault()
-      const touch = e.touches[0]
-      const { clientX, clientY } = touch
-      const rect = canvasRef.current?.getBoundingClientRect()
-      if (!rect) return
-      const offsetX = clientX - rect.left
-      const offsetY = clientY - rect.top
+      e.preventDefault();
+      const touch = e.touches[0];
+      const { clientX, clientY } = touch;
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const offsetX = clientX - rect.left;
+      const offsetY = clientY - rect.top;
       const ballIndex = metaballs.findIndex((ball) =>
-        isInsideMetaball(offsetX, offsetY, ball)
-      )
+        isInsideMetaball(offsetX, offsetY, ball),
+      );
       if (ballIndex !== -1) {
-        setDragging(ballIndex)
+        setDragging(ballIndex);
       }
     },
-    [metaballs]
-  )
+    [metaballs],
+  );
 
   const handleTouchMove = useCallback(
     (e: TouchEvent) => {
-      e.preventDefault()
+      e.preventDefault();
       if (dragging !== null) {
-        const touch = e.touches[0]
-        const { clientX, clientY } = touch
-        const rect = canvasRef.current?.getBoundingClientRect()
-        if (!rect) return
-        const offsetX = clientX - rect.left
-        const offsetY = clientY - rect.top
-        const newMetaballs = [...metaballs]
+        const touch = e.touches[0];
+        const { clientX, clientY } = touch;
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        const offsetX = clientX - rect.left;
+        const offsetY = clientY - rect.top;
+        const newMetaballs = [...metaballs];
         newMetaballs[dragging] = {
           ...newMetaballs[dragging],
           x: offsetX,
           y: offsetY,
-        }
-        setMetaballs(newMetaballs)
+        };
+        setMetaballs(newMetaballs);
       }
     },
-    [dragging, metaballs]
-  )
+    [dragging, metaballs],
+  );
 
   const handleTouchEnd = () => {
-    setDragging(null)
-  }
+    setDragging(null);
+  };
 
   const isInsideMetaball = (
     x: number,
     y: number,
-    ball: { x: number; y: number; radius: number }
+    ball: { x: number; y: number; radius: number },
   ) => {
-    const dx = x - ball.x
-    const dy = y - ball.y
-    return Math.sqrt(dx * dx + dy * dy) < ball.radius
-  }
+    const dx = x - ball.x;
+    const dy = y - ball.y;
+    return Math.sqrt(dx * dx + dy * dy) < ball.radius;
+  };
 
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
     // Add touch event listeners
-    canvas.addEventListener("touchstart", handleTouchStart, { passive: false })
-    canvas.addEventListener("touchmove", handleTouchMove, { passive: false })
-    canvas.addEventListener("touchend", handleTouchEnd)
+    canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
+    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+    canvas.addEventListener("touchend", handleTouchEnd);
 
     return () => {
       // Clean up touch event listeners
-      canvas.removeEventListener("touchstart", handleTouchStart)
-      canvas.removeEventListener("touchmove", handleTouchMove)
-      canvas.removeEventListener("touchend", handleTouchEnd)
-    }
-  }, [metaballs, dragging, handleTouchStart, handleTouchMove])
+      canvas.removeEventListener("touchstart", handleTouchStart);
+      canvas.removeEventListener("touchmove", handleTouchMove);
+      canvas.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [metaballs, dragging, handleTouchStart, handleTouchMove]);
 
   return (
     <canvas
@@ -275,7 +320,7 @@ const Metaballs = ({
       onMouseUp={handleMouseUp}
       style={{ border: "1px solid black", display: "block" }}
     />
-  )
+  );
 }
 
 export default Metaballs
