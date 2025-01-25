@@ -95,7 +95,27 @@ const Metaballs = ({
 
       ctx.putImageData(imageData, 0, 0); // Draw the filled metaballs first
 
-      ctx.strokeStyle = "rgba(119, 255, 255, 0.5)";
+      // Draw the initial radius text on each metaball in white
+      ctx.font = "bold 32px 'Arial'";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      metaballs.forEach(
+        (
+          metaball: { x: number; y: number; initialRadius: number },
+          index: number,
+        ) => {
+          // Check if the current metaball is intersecting
+          const isIntersecting = intersectingBalls.has(index);
+          ctx.fillStyle = isIntersecting ? "#FFFFFF" : textColorHex; // Change text color to white if intersecting
+          ctx.fillText(
+            Math.round(metaball.initialRadius).toString(),
+            metaball.x,
+            metaball.y,
+          );
+        },
+      );
+
+      ctx.strokeStyle = "rgba(119, 255, 255, 0.15)";
 
       ctx.lineWidth = 2.5; // Set outline width to 2 pixels
 
@@ -124,26 +144,6 @@ const Metaballs = ({
       }
 
       setDebugText(anyIntersecting ? debugText : "");
-
-      // Draw the initial radius text on each metaball in white
-      ctx.font = "bold 32px 'Arial'";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      metaballs.forEach(
-        (
-          metaball: { x: number; y: number; initialRadius: number },
-          index: number,
-        ) => {
-          // Check if the current metaball is intersecting
-          const isIntersecting = intersectingBalls.has(index);
-          ctx.fillStyle = isIntersecting ? "#FFFFFF" : textColorHex; // Change text color to white if intersecting
-          ctx.fillText(
-            Math.round(metaball.initialRadius).toString(),
-            metaball.x,
-            metaball.y,
-          );
-        },
-      );
     };
 
     const calculateField = (x: number, y: number) => {
