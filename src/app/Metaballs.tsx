@@ -14,12 +14,38 @@ const Metaballs = ({
   const [metaballs, setMetaballs] = useState(() => {
     const width = window.innerWidth
     const height = window.innerHeight
-    return Array.from({ length: 5 }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      radius: Math.random() * 50 + 30, // Random radius between 30 and 80
-      initialRadius: Math.random() * 50 + 30,
-    }))
+    const balls: {
+      x: number
+      y: number
+      radius: number
+      initialRadius: number
+    }[] = []
+    const minDistance = 100 // Minimum distance between balls
+
+    while (balls.length < 6) {
+      const radius = Math.random() * 50 + 30
+      const x = Math.random() * (width - radius * 2) + radius // Ensure ball is fully within width
+      const y =
+        Math.random() * (height * 0.75 - radius * 2) + (height * 0.25 + radius) // Ensure ball is not in top 25%
+
+      // Check if the new ball overlaps with existing balls
+      const isOverlapping = balls.some((ball) => {
+        const dx = x - ball.x
+        const dy = y - ball.y
+        const distance = Math.sqrt(dx * dx + dy * dy)
+        return distance < radius + ball.radius + minDistance
+      })
+
+      if (!isOverlapping) {
+        balls.push({
+          x,
+          y,
+          radius,
+          initialRadius: radius,
+        })
+      }
+    }
+    return balls
   })
   const [dragging, setDragging] = useState<number | null>(null)
 
