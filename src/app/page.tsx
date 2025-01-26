@@ -4,16 +4,36 @@ import { motion, useAnimate } from "motion/react";
 import { useEffect, useState } from "react";
 import Metaballs from "./Metaballs";
 import { Target } from "./components/target";
+import Time from "./components/time";
 import { symbols } from "./consts";
-import { useGame } from "./gameContext";
+import { useGameContext } from "./gameContext";
 import { calculatedCursorTextOffset } from "./lib/util";
+import useGameStore from "./stores/gameStore";
+import useTimeStore from "./stores/timeStore";
 
 const Page = () => {
   const [isClient, setIsClient] = useState(false);
   const [cursorText, setCursorText] = useState("");
   const [scope, animate] = useAnimate();
   const [pointerPosition, setPointerPosition] = useState({ x: 0, y: 0 });
-  const { newGame, gameActive } = useGame();
+  const { setTimeLeft, timeLeftPercentage, timeLeft } = useTimeStore();
+  const { newGame, gameActive } = useGameContext();
+  const { setGameActive } = useGameStore();
+
+  useEffect(() => {
+    console.log("gamePercentage", timeLeftPercentage);
+  }, [timeLeftPercentage]);
+
+  useEffect(() => {
+    const int = window.setInterval(() => {
+      setTimeLeft(timeLeft - 1);
+      if (timeLeft === 0) {
+        // Handle game over logic
+        setGameActive(false);
+      }
+    }, 1000);
+    return () => clearInterval(int);
+  }, [gameActive, timeLeft, setTimeLeft, setGameActive]);
 
   useEffect(() => {
     setIsClient(true);
@@ -73,6 +93,7 @@ const Page = () => {
       />
       <div className="absolute top-0 flex flex-col w-full h-full gap-4 items-center p-4 z-20 pointer-events-none">
         <Target className="pointer-events-auto" />
+        <Time />
       </div>
     </div>
   );

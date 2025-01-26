@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
-import { useGame } from "../gameContext";
+import { useGameContext } from "../gameContext";
 import { cn } from "../lib/util";
 
 export const Target = ({ className }: { className?: string }) => {
-  const { target, submitHovered } = useGame();
+  const { target, submitHovered } = useGameContext();
 
   return (
     <div className={cn("relative mt-6 z-[-100]", className)}>
