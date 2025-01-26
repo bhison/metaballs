@@ -4,9 +4,9 @@ const Time = () => {
   const { timeLeftPercentage } = useTimeStore();
 
   return (
-    <div className="absolute left-5 bottom-10 top-10 h-[80vh] mt-[10vh] flex flex-col gap-0 opacity-70 ">
+    <div className="absolute left-1 bottom-10 top-10 h-[80vh] mt-[10vh] flex flex-col gap-0 opacity-70 ">
       <div
-        className={`bg-red-400 rounded-t-lg w-5 ${
+        className={`bg-blue-500 rounded-t-lg w-4 ${
           timeLeftPercentage < 0.01 ? "rounded-b-lg" : ""
         }`}
         style={{
@@ -15,7 +15,7 @@ const Time = () => {
         }}
       />
       <div
-        className={`bg-green-500 w-5 rounded-b-lg transition-transform duration-1000`}
+        className={`bg-green-500 w-4 rounded-b-lg transition-transform duration-1000`}
         style={{
           height: `${timeLeftPercentage * 100}%`,
         }}
